@@ -1,0 +1,23 @@
+{
+    "name": "luketowers/php-shopify-api",
+    "description": "PHP wrapper for Shopify API",
+    "keywords": ["PHP","Shopify","API"],
+    "homepage": "https://github.com/luketowers/php-shopify-api",
+    "type": "library",
+    "require": {
+        "php": ">=7.0",
+        "guzzlehttp/guzzle": "~6.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luke Towers",
+            "email": "github@luketowers.ca"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LukeTowers\\ShopifyPHP\\": "src/"
+        }
+    }
+}

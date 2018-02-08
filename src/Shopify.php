@@ -45,12 +45,6 @@ class Shopify
     public function __construct(string $shopDomain, $credentials) {
         $this->shop_domain = $shopDomain;
 
-        // Initialize the GuzzleHttp Client
-        $this->client = new Client([
-            'base_url'    => "https://{$this->shop_domain}/",
-            'http_errors' => true,
-        ]);
-
         // Populate the credentials
         if (is_string($credentials)) {
             $this->setToken($credentials);
@@ -60,6 +54,31 @@ class Shopify
         } else {
             throw new Exception("Unexpected value provided for the credentials");
         }
+
+        // Initialize the client
+        $this->initializeClient();
+    }
+
+    /**
+     * Initialize the GuzzleHttp/Client instance
+     *
+     * @return GuzzleHttp/Client $client
+     */
+    protected function initializeClient()
+    {
+        if ($this->client) {
+            return $this->client;
+        }
+
+        $options = [
+            'base_uri'    => "https://{$this->shop_domain}/",
+            'http_errors' => true,
+        ];
+        if (!empty($this->token)) {
+            $options['headers']['X-Shopify-Access-Token'] = $this->token;
+        }
+
+        return $this->client = new Client($options);
     }
 
     /**
@@ -71,7 +90,10 @@ class Shopify
     public function setToken(string $token)
     {
         $this->token = $token;
-        $this->client->setDefaultOption('headers/X-Shopify-Access-Token', $this->token);
+        // Reset the client
+        unset($this->client);
+        $this->client = null;
+        $this->initializeClient();
     }
 
     /**
@@ -100,7 +122,7 @@ class Shopify
             $args['grant_options[]'] = 'per-user';
         }
 
-        return $this->client->get('admin/oauth/authorize', ['query' => $args])->getUrl();
+        return "https://{$this->shop_domain}/admin/oauth/authorize?" . http_build_query($args);
     }
 
     /**
@@ -113,8 +135,10 @@ class Shopify
     public function authorizeApplication(string $nonce, $requestData)
     {
         $requiredKeys = ['code', 'hmac', 'state', 'shop'];
-        if (!in_array(array_keys[$requestData], $requiredKeys)) {
-            throw new Exception("The provided request data is missing one of the following keys: " . implode(', ', $requiredKeys));
+        foreach ($requiredKeys as $required) {
+            if (!in_array($required, array_keys($requestData))) {
+                throw new Exception("The provided request data is missing one of the following keys: " . implode(', ', $requiredKeys));
+            }
         }
 
         if ($requestData['state'] !== $nonce) {
@@ -142,7 +166,7 @@ class Shopify
             ];
             $keyPatterns = array_merge($valuePatterns, ['=' => '%3D']);
             $key = str_replace(array_keys($keyPatterns), array_values($keyPatterns), $key);
-            $value = str_replace(array_keys($valuePatterns), array_value($valuePatterns, $value));
+            $value = str_replace(array_keys($valuePatterns), array_values($valuePatterns), $value);
 
             $hmacSource[] = $key . '=' . $value;
         }
@@ -158,11 +182,21 @@ class Shopify
         }
 
         // Make the access token request to Shopify
-        $response = $this->client->request('POST', 'admin/oauth/access_token', ['body' => [
-            'client_id'     => $this->api_key,
-            'client_secret' => $this->secret,
-            'code'          => $code,
-        ]]);
+        try {
+            $response = $this->client->request('POST', 'admin/oauth/access_token', [
+                'body' => json_encode([
+                    'client_id'     => $this->api_key,
+                    'client_secret' => $this->secret,
+                    'code'          => $requestData['code'],
+                ]),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+        } catch (Exception $e) {
+            // Pass the erroring response direct to browser
+            die($e->getResponse()->getBody());
+        }
 
         // Decode the response from Shopify
         $data = json_decode($response->getBody());

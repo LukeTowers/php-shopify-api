@@ -291,6 +291,6 @@ class Shopify
             throw new Exception("Call limits can't be polled before a request has been made.");
         }
 
-        return explode('/', $this->last_response_headers['X-Shopify-Shop-Api-Call-Limit']);
+        return explode('/', $this->last_response_headers['X-Shopify-Shop-Api-Call-Limit'][0]);
     }
 }

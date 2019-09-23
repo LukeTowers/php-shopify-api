@@ -8,17 +8,17 @@ class Shopify
     /**
      * @var string The shop domain being interacted with
      */
-    private $shop_domain;
+    protected $shop_domain;
 
     /**
      * @var string The API Key to use with these requests
      */
-    private $api_key;
+    protected $api_key;
 
     /**
      * @var string The Secret Key associated with the provided API Key
      */
-    private $secret;
+    protected $secret;
 
     /**
      * @var string The Authentication Token to connect to the provided shop
@@ -28,12 +28,12 @@ class Shopify
     /**
      * @var GuzzleHttp\Client The Client object used for requests
      */
-    private $client;
+    protected $client;
 
     /**
      * @var array The headers from the last request
      */
-    private $last_response_headers;
+    protected $last_response_headers;
 
     /**
      * Initialize the Client

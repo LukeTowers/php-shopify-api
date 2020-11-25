@@ -18,6 +18,7 @@ use LukeTowers\ShopifyPHP\OAuth\AuthorizationUrlProviderInterface;
 use LukeTowers\ShopifyPHP\OAuth\Authorizator;
 use LukeTowers\ShopifyPHP\OAuth\AuthorizatorFactoryInterface;
 use LukeTowers\ShopifyPHP\OAuth\AuthorizatorInterface;
+use LukeTowers\ShopifyPHP\OAuth\Scopes;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 
@@ -38,9 +39,12 @@ final class ShopifyService implements
         return new self(new JsonClient($requestFactory, $client));
     }
 
-    public static function createAuthorizationUrlProvider(ApiCredentials $credentials): AuthorizationUrlProviderInterface
-    {
-        return new AuthorizationUrlProvider($credentials->getApiKey());
+    public static function createAuthorizationUrlProvider(
+        ApiCredentials $credentials,
+        Scopes $scopes,
+        string $redirectUrl
+    ): AuthorizationUrlProviderInterface {
+        return new AuthorizationUrlProvider($credentials->getApiKey(), $scopes, $redirectUrl);
     }
 
     public function createAuthorizator(ApiCredentials $credentials): AuthorizatorInterface

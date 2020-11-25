@@ -10,23 +10,25 @@ use LukeTowers\ShopifyPHP\Credentials\ShopDomain;
 final class AuthorizationUrlProvider implements AuthorizationUrlProviderInterface
 {
     private ApiKey $apiKey;
+    private Scopes $scopes;
+    private string $redirectUrl;
 
-    public function __construct(ApiKey $apiKey)
+    public function __construct(ApiKey $apiKey, Scopes $scopes, string $redirectUrl)
     {
         $this->apiKey = $apiKey;
+        $this->scopes = $scopes;
+        $this->redirectUrl = $redirectUrl;
     }
 
     public function getAuthorizationUrl(
         ShopDomain $shopDomain,
-        Scopes $scopes,
-        string $redirectUrl,
         string $nonce = '',
         bool $onlineAccessMode = false
     ): string {
         $args = [
             'client_id'    => $this->apiKey,
-            'scope'        => (string) $scopes,
-            'redirect_uri' => $redirectUrl,
+            'scope'        => (string) $this->scopes,
+            'redirect_uri' => $this->redirectUrl,
             'state'        => $nonce,
         ];
 

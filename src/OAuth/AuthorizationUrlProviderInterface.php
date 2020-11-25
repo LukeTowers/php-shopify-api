@@ -10,8 +10,6 @@ interface AuthorizationUrlProviderInterface
 {
     public function getAuthorizationUrl(
         ShopDomain $shopDomain,
-        Scopes $scopes,
-        string $redirectUrl,
         string $nonce = '',
         bool $onlineAccessMode = false
     ): string;

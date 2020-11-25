@@ -12,7 +12,7 @@ interface JsonClientInterface
      * @param string $endpoint
      * @param array $headers
      * @param array|object|null $body
-     * @param array $query
+     * @param array<string, mixed> $query
      * @return JsonResponse
      * @throws JsonClientException
      */

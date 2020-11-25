@@ -13,6 +13,8 @@ use LukeTowers\ShopifyPHP\Credentials\ApiCredentials;
 use LukeTowers\ShopifyPHP\Credentials\ShopDomain;
 use LukeTowers\ShopifyPHP\Http\JsonClient;
 use LukeTowers\ShopifyPHP\Http\JsonClientInterface;
+use LukeTowers\ShopifyPHP\OAuth\AuthorizationUrlProvider;
+use LukeTowers\ShopifyPHP\OAuth\AuthorizationUrlProviderInterface;
 use LukeTowers\ShopifyPHP\OAuth\Authorizator;
 use LukeTowers\ShopifyPHP\OAuth\AuthorizatorFactoryInterface;
 use LukeTowers\ShopifyPHP\OAuth\AuthorizatorInterface;
@@ -20,9 +22,9 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 
 final class ShopifyService implements
-    PrivateAppClientFactoryInterface,
+    AuthorizatorFactoryInterface,
     PublicAppClientFactoryInterface,
-    AuthorizatorFactoryInterface
+    PrivateAppClientFactoryInterface
 {
     private JsonClientInterface $client;
 
@@ -36,10 +38,14 @@ final class ShopifyService implements
         return new self(new JsonClient($requestFactory, $client));
     }
 
-    public function createPrivateAppClient(ShopDomain $shopDomain, ApiCredentials $credentials): ShopifyClientInterface
+    public static function createAuthorizationUrlProvider(ApiCredentials $credentials): AuthorizationUrlProviderInterface
     {
-        $authHeader = 'Basic ' . \base64_encode($credentials->getApiKey() . ':' . $credentials->getSecret());
-        return new ShopifyClient($this->client, $shopDomain, ['Authorization' => $authHeader]);
+        return new AuthorizationUrlProvider($credentials->getApiKey());
+    }
+
+    public function createAuthorizator(ApiCredentials $credentials): AuthorizatorInterface
+    {
+        return new Authorizator($this->client, $credentials);
     }
 
     public function createPublicAppClient(ShopDomain $shopDomain, AccessToken $accessToken): ShopifyClientInterface
@@ -47,8 +53,9 @@ final class ShopifyService implements
         return new ShopifyClient($this->client, $shopDomain, ['X-Shopify-Access-Token' => (string) $accessToken]);
     }
 
-    public function createAuthorizator(ApiCredentials $credentials): AuthorizatorInterface
+    public function createPrivateAppClient(ShopDomain $shopDomain, ApiCredentials $credentials): ShopifyClientInterface
     {
-        return new Authorizator($this->client, $credentials);
+        $authHeader = 'Basic ' . \base64_encode($credentials->getApiKey() . ':' . $credentials->getSecret());
+        return new ShopifyClient($this->client, $shopDomain, ['Authorization' => $authHeader]);
     }
 }

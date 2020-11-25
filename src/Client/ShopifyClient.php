@@ -38,7 +38,7 @@ final class ShopifyClient implements ShopifyClientInterface
 
         $matches = [];
         $apiCallLimitHeader = $response->getHeader('X-Shopify-Shop-Api-Call-Limit');
-        if (!\preg_match('#(\\d+)/(\\d+)#', $apiCallLimitHeader, $matches)) {
+        if (!$apiCallLimitHeader || !\preg_match('#^(\\d+)/(\\d+)$#', $apiCallLimitHeader, $matches)) {
             return ShopifyResponse::unlimited($response->getStatus(), $response->getBody());
         }
         return ShopifyResponse::limited($response->getStatus(), $response->getBody(), (int) $matches[0], (int) $matches[1]);

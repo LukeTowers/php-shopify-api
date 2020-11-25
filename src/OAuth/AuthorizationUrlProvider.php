@@ -7,7 +7,7 @@ namespace LukeTowers\ShopifyPHP\OAuth;
 use LukeTowers\ShopifyPHP\Credentials\ApiKey;
 use LukeTowers\ShopifyPHP\Credentials\ShopDomain;
 
-final class AuthorizationUrlProvider
+final class AuthorizationUrlProvider implements AuthorizationUrlProviderInterface
 {
     private ApiKey $apiKey;
 

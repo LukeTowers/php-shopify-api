@@ -11,8 +11,8 @@ interface ShopifyClientInterface
     /**
      * @param string $method
      * @param string $endpoint
-     * @param null $body
-     * @param array $query
+     * @param array|object|null $body
+     * @param array<string, mixed> $query
      * @return ShopifyResponse
      * @throws ShopifyExceptionInterface
      */

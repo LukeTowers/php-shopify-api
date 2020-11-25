@@ -15,6 +15,11 @@ final class ApiCredentials
         $this->secret = $secret;
     }
 
+    public static function create(string $apiKey, string $secret): self
+    {
+        return new self(ApiKey::fromString($apiKey), ApiSecretKey::fromString($secret));
+    }
+
     public function getApiKey(): ApiKey
     {
         return $this->apiKey;

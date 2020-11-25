@@ -26,7 +26,7 @@ final class AuthorizationUrlProvider implements AuthorizationUrlProviderInterfac
         bool $onlineAccessMode = false
     ): string {
         $args = [
-            'client_id'    => $this->apiKey,
+            'client_id'    => (string) $this->apiKey,
             'scope'        => (string) $this->scopes,
             'redirect_uri' => $this->redirectUrl,
             'state'        => $nonce,

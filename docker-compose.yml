@@ -1,0 +1,9 @@
+version: '3.5'
+
+services:
+  php:
+    image: composer:latest
+    container_name: php
+    volumes:
+      - .:/app:delegated
+    working_dir: /app

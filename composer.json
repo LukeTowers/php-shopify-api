@@ -5,8 +5,10 @@
     "homepage": "https://github.com/luketowers/php-shopify-api",
     "type": "library",
     "require": {
-        "php": ">=7.0",
-        "guzzlehttp/guzzle": "~6.0"
+        "php": ">=7.4",
+        "ext-json": "*",
+        "psr/http-factory": "^1.0",
+        "psr/http-client": "^1.0"
     },
     "license": "MIT",
     "authors": [
@@ -19,5 +21,8 @@
         "psr-4": {
             "LukeTowers\\ShopifyPHP\\": "src/"
         }
+    },
+    "require-dev": {
+        "vimeo/psalm": "^4.2"
     }
 }

@@ -13,6 +13,16 @@ final class ShopDomain
         $this->shopName = $shopName;
     }
 
+    public static function create($value): self
+    {
+        if (!\is_string($value)) {
+            throw new ShopDomainException(
+                'Expected shop domain, got' . (\is_object($value) ? \get_class($value) : \gettype($value))
+            );
+        }
+        return self::fromString($value);
+    }
+
     public function fromShopName(string $shopName): self
     {
         $matches = [];

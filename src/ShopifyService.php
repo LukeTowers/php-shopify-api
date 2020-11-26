@@ -10,6 +10,7 @@ use LukeTowers\ShopifyPHP\Credentials\AccessToken;
 use LukeTowers\ShopifyPHP\Credentials\ApiCredentials;
 use LukeTowers\ShopifyPHP\Credentials\ApiKey;
 use LukeTowers\ShopifyPHP\Credentials\ShopDomain;
+use LukeTowers\ShopifyPHP\Credentials\ShopDomainException;
 use LukeTowers\ShopifyPHP\Http\JsonClient;
 use LukeTowers\ShopifyPHP\Http\JsonClientException;
 use LukeTowers\ShopifyPHP\Http\JsonClientInterface;
@@ -41,13 +42,14 @@ final class ShopifyService
         return $this->credentials->getApiKey();
     }
 
+    /**
+     * @param array $requestData
+     * @return ShopDomain
+     * @throws ShopDomainException
+     */
     public function validateShopRequest(array $requestData): ShopDomain
     {
-        try {
-            return ShopDomain::create($requestData['shop'] ?? null);
-        } catch (\Throwable $e) {
-            throw new AuthorizationException("The shop provided by Shopify is invalid: " . $e->getMessage());
-        }
+        return ShopDomain::create($requestData['shop'] ?? null);
     }
 
     public function getAuthorizationUrl(
@@ -71,9 +73,21 @@ final class ShopifyService
         return "https://{$shopDomain}/admin/oauth/authorize?" . http_build_query($args);
     }
 
+    /**
+     * @param array $requestData
+     * @param string $nonce
+     * @param ShopDomain|null $shopDomain
+     * @return AuthorizationRequest
+     * @throws AuthorizationException
+     */
     public function validateAuthorizationRequest(array $requestData, string $nonce = '', ?ShopDomain $shopDomain = null): AuthorizationRequest
     {
-        $requestShopDomain = $this->validateShopRequest($requestData);
+        try {
+            $requestShopDomain = ShopDomain::create($requestData['shop'] ?? null);
+        } catch (\Throwable $e) {
+            throw new AuthorizationException("The shop provided by Shopify is invalid: " . $e->getMessage());
+        }
+
         $requiredKeys = ['code', 'hmac', 'state'];
         foreach ($requiredKeys as $required) {
             if (!in_array($required, array_keys($requestData))) {
@@ -130,6 +144,11 @@ final class ShopifyService
         return new AuthorizationRequest($requestShopDomain, $requestData['code']);
     }
 
+    /**
+     * @param AuthorizationRequest $request
+     * @return AuthorizationResponse
+     * @throws AuthorizationException
+     */
     public function authorizeApplication(AuthorizationRequest $request): AuthorizationResponse
     {
         try {
@@ -142,8 +161,8 @@ final class ShopifyService
                     'client_id'     => (string) $this->credentials->getApiKey(),
                     'client_secret' => (string) $this->credentials->getSecret(),
                     'code'          => $request->getCode(),
-                ],
-                );
+                ]
+            );
         } catch (JsonClientException $e) {
             throw new AuthorizationException('Authorization request failed: ' . $e->getMessage(), 0, $e);
         }
@@ -166,8 +185,8 @@ final class ShopifyService
         return new ShopifyClient($this->client, $shopDomain, ['Authorization' => $authHeader]);
     }
 
-    public function createPublicApp(Scopes $scopes, string $redirectUrl): PublicApp
+    public function createPublicApp(string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null): PublicApp
     {
-        return new PublicApp($this, $scopes, $redirectUrl);
+        return new PublicApp($this, $redirectUrl, $requiredScopes, $optionalScopes);
     }
 }

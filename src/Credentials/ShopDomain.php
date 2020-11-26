@@ -13,6 +13,11 @@ final class ShopDomain
         $this->shopName = $shopName;
     }
 
+    /**
+     * @param $value
+     * @return static
+     * @throws ShopDomainException
+     */
     public static function create($value): self
     {
         if (!\is_string($value)) {
@@ -23,6 +28,11 @@ final class ShopDomain
         return self::fromString($value);
     }
 
+    /**
+     * @param string $shopName
+     * @return $this
+     * @throws ShopDomainException
+     */
     public function fromShopName(string $shopName): self
     {
         $matches = [];
@@ -32,6 +42,11 @@ final class ShopDomain
         return new self($matches[0]);
     }
 
+    /**
+     * @param string $shopDomain
+     * @return static
+     * @throws ShopDomainException
+     */
     public static function fromString(string $shopDomain): self
     {
         $matches = [];

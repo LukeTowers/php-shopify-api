@@ -17,12 +17,12 @@ use LukeTowers\ShopifyPHP\OAuth\Scopes;
 
 class ShopifyPublicApp
 {
-    private ShopifyService $shopify;
+    private Shopify $shopify;
     private string $redirectUrl;
     private Scopes $requiredScopes;
     private ?Scopes $optionalScopes;
 
-    public function __construct(ShopifyService $shopify, string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null)
+    public function __construct(Shopify $shopify, string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null)
     {
         if ($optionalScopes !== null && $requiredScopes->hasAny($optionalScopes)) {
             throw new \InvalidArgumentException(\sprintf(

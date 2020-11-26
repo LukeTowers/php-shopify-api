@@ -10,9 +10,9 @@ final class AuthorizationResponse
 {
     private AccessToken $accessToken;
     private Scopes $scopes;
-    private OnlineAuthorizationInfo $onlineInfo;
+    private ?OnlineAuthorizationInfo $onlineInfo;
 
-    public function __construct(AccessToken $accessToken, Scopes $scopes, ?OnlineAuthorizationInfo $onlineInfo)
+    public function __construct(AccessToken $accessToken, Scopes $scopes, ?OnlineAuthorizationInfo $onlineInfo = null)
     {
         $this->accessToken = $accessToken;
         $this->scopes = $scopes;

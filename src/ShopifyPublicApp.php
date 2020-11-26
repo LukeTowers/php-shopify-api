@@ -15,7 +15,7 @@ use LukeTowers\ShopifyPHP\OAuth\AuthorizationResponse;
 use LukeTowers\ShopifyPHP\OAuth\ScopeException;
 use LukeTowers\ShopifyPHP\OAuth\Scopes;
 
-class PublicApp
+class ShopifyPublicApp
 {
     private ShopifyService $shopify;
     private string $redirectUrl;

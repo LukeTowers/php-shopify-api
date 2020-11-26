@@ -65,7 +65,7 @@ final class ShopifyService
             $args['grant_options[]'] = 'per-user';
         }
 
-        return "https://{$shopDomain}/admin/oauth/authorize?" . http_build_query($args);
+        return $shopDomain->getShopUrl() . '/admin/oauth/authorize?' . http_build_query($args);
     }
 
     /**
@@ -197,8 +197,8 @@ final class ShopifyService
         return new ShopifyClient($this->client, $shopDomain, ['Authorization' => $authHeader]);
     }
 
-    public function createPublicApp(string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null): PublicApp
+    public function createPublicApp(string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null): ShopifyPublicApp
     {
-        return new PublicApp($this, $redirectUrl, $requiredScopes, $optionalScopes);
+        return new ShopifyPublicApp($this, $redirectUrl, $requiredScopes, $optionalScopes);
     }
 }

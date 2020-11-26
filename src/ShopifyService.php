@@ -20,7 +20,7 @@ use LukeTowers\ShopifyPHP\OAuth\Scopes;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 
-final class ShopifyService
+class ShopifyService
 {
     private JsonClientInterface $client;
     private ApiCredentials $credentials;

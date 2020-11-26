@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LukeTowers\ShopifyPHP\OAuth;
 
-final class Scopes implements \Countable, \IteratorAggregate
+final class Scopes implements \Countable, \IteratorAggregate, \JsonSerializable
 {
     private array $scopes;
 
@@ -93,6 +93,11 @@ final class Scopes implements \Countable, \IteratorAggregate
     public function __toString(): string
     {
         return \implode(',', $this->scopes);
+    }
+
+    public function jsonSerialize(): string
+    {
+        return (string) $this;
     }
 
     public function has(string $scope): bool

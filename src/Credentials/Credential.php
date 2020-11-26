@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LukeTowers\ShopifyPHP\Credentials;
 
-abstract class Credential
+abstract class Credential implements \JsonSerializable
 {
     protected const NOT_STRING_ERROR = 'Exected string';
     protected const EMPTY_TOKEN_ERROR = 'Value cannot be empty';
@@ -32,6 +32,11 @@ abstract class Credential
     }
 
     public function __toString(): string
+    {
+        return $this->value;
+    }
+
+    public function jsonSerialize(): string
     {
         return $this->value;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LukeTowers\ShopifyPHP\Credentials;
 
-final class ShopDomain
+final class ShopDomain implements \JsonSerializable
 {
     private string $shopName;
 
@@ -64,6 +64,11 @@ final class ShopDomain
     public function __toString(): string
     {
         return $this->shopName . '.myshopify.com';
+    }
+
+    public function jsonSerialize(): string
+    {
+        return (string) $this;
     }
 
     public function getShopName(): string

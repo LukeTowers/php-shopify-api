@@ -12,6 +12,9 @@ abstract class Credential implements \JsonSerializable
 
     private function __construct(string $value)
     {
+        if ($value === '') {
+            throw new CredentialsException(static::EMPTY_TOKEN_ERROR);
+        }
         $this->value = $value;
     }
 
@@ -25,10 +28,7 @@ abstract class Credential implements \JsonSerializable
         if (!\is_string($value)) {
             throw new CredentialsException(static::NOT_STRING_ERROR);
         }
-        if ($value === '') {
-            throw new CredentialsException(static::EMPTY_TOKEN_ERROR);
-        }
-        return new static($value);
+        return static::fromString($value);
     }
 
     public function __toString(): string
@@ -38,6 +38,6 @@ abstract class Credential implements \JsonSerializable
 
     public function jsonSerialize(): string
     {
-        return $this->value;
+        return (string) $this;
     }
 }

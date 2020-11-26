@@ -153,7 +153,7 @@ final class ShopifyService
     {
         try {
             $response = $this->client->call(
-                (string) $request->getShopDomain(),
+                $request->getShopDomain()->getShopUrl(),
                 'POST',
                 '/admin/oauth/access_token',
                 [],

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LukeTowers\ShopifyPHP\OAuth;
 
-final class Scopes implements \Countable
+final class Scopes implements \Countable, \IteratorAggregate
 {
     private array $scopes;
 
@@ -73,6 +73,11 @@ final class Scopes implements \Countable
             throw new ScopeException('No scopes provided');
         }
         return $clone;
+    }
+
+    public function getIterator(): \Iterator
+    {
+        return new \ArrayIterator($this->toArray());
     }
 
     public function count(): int

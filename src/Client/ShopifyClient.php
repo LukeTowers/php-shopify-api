@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace LukeTowers\ShopifyPHP\Client;
 
+use LukeTowers\ShopifyPHP\Credentials\AccessToken;
+use LukeTowers\ShopifyPHP\Credentials\ApiCredentials;
 use LukeTowers\ShopifyPHP\Credentials\ShopDomain;
 use LukeTowers\ShopifyPHP\Http\JsonClientException;
 use LukeTowers\ShopifyPHP\Http\JsonClientInterface;
@@ -14,11 +16,22 @@ final class ShopifyClient implements ShopifyClientInterface
     private ShopDomain $shopDomain;
     private array $headers;
 
-    public function __construct(JsonClientInterface $client, ShopDomain $shopDomain, array $headers)
+    private function __construct(JsonClientInterface $client, ShopDomain $shopDomain, array $headers)
     {
         $this->client = $client;
         $this->shopDomain = $shopDomain;
         $this->headers = $headers;
+    }
+
+    public static function forPublicApp(JsonClientInterface $client, ShopDomain $shopDomain, AccessToken $accessToken): self
+    {
+        return new self($client, $shopDomain, ['X-Shopify-Access-Token' => (string) $accessToken]);
+    }
+
+    public static function forPrivateApp(JsonClientInterface $client, ShopDomain $shopDomain, ApiCredentials $credentials): self
+    {
+        $authHeader = 'Basic ' . \base64_encode($credentials->getApiKey() . ':' . $credentials->getSecret());
+        return new self($client, $shopDomain, ['Authorization' => $authHeader]);
     }
 
     public function call(string $method, string $endpoint, $body = null, array $query = []): ShopifyResponse

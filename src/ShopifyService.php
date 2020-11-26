@@ -36,6 +36,37 @@ class ShopifyService
         return new self(new JsonClient($requestFactory, $client), $credentials);
     }
 
+    public static function privateAppClient(
+        RequestFactoryInterface $requestFactory,
+        ClientInterface $client,
+        ShopDomain $shopDomain,
+        ApiCredentials $credentials
+    ): ShopifyClientInterface {
+        return ShopifyClient::forPrivateApp(new JsonClient($requestFactory, $client), $shopDomain, $credentials);
+    }
+
+    public static function publicAppClient(
+        RequestFactoryInterface $requestFactory,
+        ClientInterface $client,
+        ShopDomain $shopDomain,
+        AccessToken $accessToken
+    ): ShopifyClientInterface {
+        return ShopifyClient::forPublicApp(new JsonClient($requestFactory, $client), $shopDomain, $accessToken);
+    }
+
+    public static function publicApp(
+        RequestFactoryInterface $requestFactory,
+        ClientInterface $client,
+        ApiCredentials $credentials,
+        string $redirectUrl,
+        Scopes $requiredScopes,
+        ?Scopes $optionalScopes
+    ): ShopifyPublicApp
+    {
+        return self::create($requestFactory, $client, $credentials)
+            ->createPublicApp($redirectUrl, $requiredScopes, $optionalScopes);
+    }
+
     public function getApiKey(): ApiKey
     {
         return $this->credentials->getApiKey();
@@ -187,13 +218,12 @@ class ShopifyService
 
     public function createPublicAppClient(ShopDomain $shopDomain, AccessToken $accessToken): ShopifyClientInterface
     {
-        return new ShopifyClient($this->client, $shopDomain, ['X-Shopify-Access-Token' => (string) $accessToken]);
+        return ShopifyClient::forPublicApp($this->client, $shopDomain, $accessToken);
     }
 
     public function createPrivateAppClient(ShopDomain $shopDomain): ShopifyClientInterface
     {
-        $authHeader = 'Basic ' . \base64_encode($this->credentials->getApiKey() . ':' . $this->credentials->getSecret());
-        return new ShopifyClient($this->client, $shopDomain, ['Authorization' => $authHeader]);
+        return ShopifyClient::forPrivateApp($this->client, $shopDomain, $this->credentials);
     }
 
     public function createPublicApp(string $redirectUrl, Scopes $requiredScopes, ?Scopes $optionalScopes = null): ShopifyPublicApp

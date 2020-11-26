@@ -47,7 +47,7 @@ class PublicApp
      * @return ShopDomain
      * @throws ShopDomainException
      */
-    public function validateShopRequest(array $requestData)
+    public function validateShopRequest(array $requestData): ShopDomain
     {
         return $this->shopify->validateShopRequest($requestData);
     }
@@ -64,6 +64,16 @@ class PublicApp
             $nonce,
             $onlineAccessMode
         );
+    }
+
+    /**
+     * @param array $requestData
+     * @return ShopDomain
+     * @throws AuthorizationException
+     */
+    public function validateSecuredRequest(array $requestData): ShopDomain
+    {
+        return $this->shopify->validateSecuredRequest($requestData);
     }
 
     /**

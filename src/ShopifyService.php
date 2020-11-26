@@ -42,11 +42,6 @@ final class ShopifyService
         return $this->credentials->getApiKey();
     }
 
-    /**
-     * @param array $requestData
-     * @return ShopDomain
-     * @throws ShopDomainException
-     */
     public function validateShopRequest(array $requestData): ShopDomain
     {
         return ShopDomain::create($requestData['shop'] ?? null);
@@ -75,20 +70,18 @@ final class ShopifyService
 
     /**
      * @param array $requestData
-     * @param string $nonce
-     * @param ShopDomain|null $shopDomain
-     * @return AuthorizationRequest
+     * @return ShopDomain
      * @throws AuthorizationException
      */
-    public function validateAuthorizationRequest(array $requestData, string $nonce = '', ?ShopDomain $shopDomain = null): AuthorizationRequest
+    public function validateSecuredRequest(array $requestData): ShopDomain
     {
         try {
-            $requestShopDomain = ShopDomain::create($requestData['shop'] ?? null);
+            $requestShopDomain = $this->validateShopRequest($requestData);
         } catch (\Throwable $e) {
             throw new AuthorizationException("The shop provided by Shopify is invalid: " . $e->getMessage());
         }
 
-        $requiredKeys = ['code', 'hmac', 'state'];
+        $requiredKeys = ['hmac'];
         foreach ($requiredKeys as $required) {
             if (!in_array($required, array_keys($requestData))) {
                 throw new AuthorizationException(
@@ -97,23 +90,12 @@ final class ShopifyService
             }
         }
 
-        if ($requestData['state'] !== $nonce) {
-            throw new AuthorizationException("The provided nonce ($nonce) did not match the nonce provided by Shopify ({$requestData['state']})");
-        }
-
-        if ($shopDomain !== null && !$shopDomain->equals($requestShopDomain)) {
-            throw new AuthorizationException(\sprintf(
-                "The shop provided by Shopify (%s) does not match the shop provided to this API (%s)",
-                (string) $requestShopDomain,
-                (string) $shopDomain
-            ));
-        }
-
         // Check HMAC signature. See https://help.shopify.com/api/getting-started/authentication/oauth#verification
         $hmacSource = [];
         foreach ($requestData as $key => $value) {
-            // Skip the hmac key
-            if ($key === 'hmac') { continue; }
+            if ($key === 'hmac') {
+                continue;
+            }
 
             // Replace the characters as specified by Shopify in the keys and values
             $valuePatterns = [
@@ -138,6 +120,36 @@ final class ShopifyService
                 "The HMAC provided by Shopify (%s) doesn't match the HMAC verification (%s).",
                 $requestData['hmac'],
                 $hmacString
+            ));
+        }
+
+        return $requestShopDomain;
+    }
+
+    /**
+     * @param array $requestData
+     * @param string $nonce
+     * @param ShopDomain|null $shopDomain
+     * @return AuthorizationRequest
+     * @throws AuthorizationException
+     */
+    public function validateAuthorizationRequest(array $requestData, string $nonce = '', ?ShopDomain $shopDomain = null): AuthorizationRequest
+    {
+        if (!isset($requestData['code']) || !\is_string($requestData['code']) || empty($requestData['code'])) {
+            throw new AuthorizationException("Invalid or missing grant code.");
+        }
+
+        if (($requestData['state'] ?? null)  !== $nonce) {
+            throw new AuthorizationException("Invalid or missing nonce.");
+        }
+
+        $requestShopDomain = $this->validateSecuredRequest($requestData);
+
+        if ($shopDomain !== null && !$shopDomain->equals($requestShopDomain)) {
+            throw new AuthorizationException(\sprintf(
+                "The shop provided by Shopify (%s) does not match the shop provided to this API (%s)",
+                (string) $requestShopDomain,
+                (string) $shopDomain
             ));
         }
 

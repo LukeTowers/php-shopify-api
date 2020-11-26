@@ -60,7 +60,7 @@ class ShopifyService
         ApiCredentials $credentials,
         string $redirectUrl,
         Scopes $requiredScopes,
-        ?Scopes $optionalScopes
+        ?Scopes $optionalScopes = null
     ): ShopifyPublicApp
     {
         return self::create($requestFactory, $client, $credentials)
